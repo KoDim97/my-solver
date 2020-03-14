@@ -6,13 +6,14 @@
 #include <cmath>
 #include <new>
 #include <cstring>
+
 IVector::~IVector() = default;
 
 namespace {
 
     class Vector_Impl : public IVector {
     public:
-        Vector_Impl(size_t dim, double *pCoords);
+        Vector_Impl(size_t dim, double *pCoords, ILogger* pLogger);
         ~Vector_Impl() override;
         IVector* clone() const override;
         size_t getDim() const override;
@@ -21,17 +22,13 @@ namespace {
     protected:
         size_t m_dim{0};
         double *m_ptr_coord{nullptr};
-        ILogger * logger;
+        ILogger * logger {nullptr};
     };
 }//end Vector_Impl
 
-Vector_Impl::Vector_Impl(size_t dim, double *pCoords): m_dim(dim), m_ptr_coord(pCoords){
-    logger = ILogger::createLogger(this);
-}
+Vector_Impl::Vector_Impl(size_t dim, double *pCoords, ILogger* pLogger): m_dim(dim), m_ptr_coord(pCoords), logger(pLogger){}
 
-Vector_Impl::~Vector_Impl(){
-    logger->destroyLogger(this);
-};
+Vector_Impl::~Vector_Impl(){};
 
 double Vector_Impl::getCoord(size_t index) const {
     if(index + 1 > m_dim){
@@ -214,7 +211,7 @@ IVector* IVector::createVector(size_t dim, double *pData, ILogger* pLogger) {
         return nullptr;
     }
     auto *pVector = new(ptr)Vector_Impl(dim,
-                                               reinterpret_cast<double *>((unsigned char *) ptr + sizeof(Vector_Impl)));
+                                               reinterpret_cast<double *>((unsigned char *) ptr + sizeof(Vector_Impl)), pLogger);
     memcpy((unsigned char*)ptr + sizeof(Vector_Impl), pData, dim * sizeof(double));
     return pVector;
 }

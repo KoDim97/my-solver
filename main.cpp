@@ -1,6 +1,5 @@
 #include <iostream>
 #include "interfaces/IVector.h"
-#include <math.h>
 
 int main() {
     double arr1[2] = {1,2};
