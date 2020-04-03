@@ -19,6 +19,7 @@ namespace {
         size_t getDim() const override;
         double getCoord(size_t index) const override;
         RESULT_CODE setCoord(size_t index, double value) override;
+        double norm(NORM norm) const override;
     protected:
         size_t m_dim{0};
         double *m_ptr_coord{nullptr};
@@ -32,7 +33,7 @@ Vector_Impl::~Vector_Impl(){};
 
 double Vector_Impl::getCoord(size_t index) const {
     if(index + 1 > m_dim){
-        logger->log("Index is out of bounds", RESULT_CODE::OUT_OF_BOUNDS);
+        logger->log("In getCoord(...)", RESULT_CODE::OUT_OF_BOUNDS);
         return NAN;
     }
     return m_ptr_coord[index];
@@ -44,11 +45,11 @@ size_t Vector_Impl::getDim() const {
 
 RESULT_CODE Vector_Impl::setCoord(size_t index, double value) {
     if(index + 1 > m_dim){
-        logger->log("Index is out of bounds", RESULT_CODE::OUT_OF_BOUNDS);
+        logger->log("In setCoord(...)", RESULT_CODE::OUT_OF_BOUNDS);
         return RESULT_CODE::OUT_OF_BOUNDS;
     }
-    if(_isnan(value)){
-        logger->log("Value is NAN", RESULT_CODE::NAN_VALUE);
+    if(__isnan(value)){
+        logger->log("In setCoord(...)", RESULT_CODE::NAN_VALUE);
         return RESULT_CODE::NAN_VALUE;
     }
     m_ptr_coord[index] = value;
@@ -62,13 +63,13 @@ IVector* Vector_Impl::clone() const {
 IVector* IVector::add(IVector const *pOperand1, IVector const *pOperand2, ILogger* pLogger) {
     if (pOperand1 == nullptr || pOperand2 == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Some operands are nullptr", RESULT_CODE::BAD_REFERENCE);
+            pLogger->log("In add(...)", RESULT_CODE::BAD_REFERENCE);
         }
         return nullptr;
     }
     if (pOperand1->getDim() != pOperand2->getDim()){
         if (pLogger != nullptr){
-            pLogger->log("Different dimensions of operands", RESULT_CODE::WRONG_DIM);
+            pLogger->log("In add(...) expected the same dim of operands", RESULT_CODE::WRONG_DIM);
         }
         return nullptr;
     }
@@ -76,7 +77,7 @@ IVector* IVector::add(IVector const *pOperand1, IVector const *pOperand2, ILogge
     auto * _arr = new (std::nothrow) double[_dim];
     if (!_arr){
         if (pLogger != nullptr){
-            pLogger->log("Not enough memory", RESULT_CODE::OUT_OF_MEMORY);
+            pLogger->log("In add(...)", RESULT_CODE::OUT_OF_MEMORY);
         }
         return nullptr;
     }
@@ -91,13 +92,13 @@ IVector* IVector::add(IVector const *pOperand1, IVector const *pOperand2, ILogge
 IVector* IVector::sub(IVector const *pOperand1, IVector const *pOperand2, ILogger* pLogger) {
     if (pOperand1 == nullptr || pOperand2 == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Some operands are nullptr", RESULT_CODE::BAD_REFERENCE);
+            pLogger->log("In sub(...)", RESULT_CODE::BAD_REFERENCE);
         }
         return nullptr;
     }
     if (pOperand1->getDim() != pOperand2->getDim()){
         if (pLogger != nullptr){
-            pLogger->log("Different dimensions of operands", RESULT_CODE::WRONG_DIM);
+            pLogger->log("In sub(...) expected the same dim of operands", RESULT_CODE::WRONG_DIM);
         }
         return nullptr;
     }
@@ -105,7 +106,7 @@ IVector* IVector::sub(IVector const *pOperand1, IVector const *pOperand2, ILogge
     auto * _arr = new (std::nothrow) double[_dim];
     if (!_arr){
         if (pLogger != nullptr){
-            pLogger->log("Not enough memory", RESULT_CODE::OUT_OF_MEMORY);
+            pLogger->log("In sub(...)", RESULT_CODE::OUT_OF_MEMORY);
         }
         return nullptr;
     }
@@ -120,13 +121,13 @@ IVector* IVector::sub(IVector const *pOperand1, IVector const *pOperand2, ILogge
 double IVector::mul(IVector const *pOperand1, IVector const *pOperand2, ILogger* pLogger) {
     if (pOperand1 == nullptr || pOperand2 == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Some operands are nullptr", RESULT_CODE::BAD_REFERENCE);
+            pLogger->log("In mul(...)", RESULT_CODE::BAD_REFERENCE);
         }
         return NAN;
     }
     if (pOperand1->getDim() != pOperand2->getDim()){
         if (pLogger != nullptr){
-            pLogger->log("Different dimensions of operands", RESULT_CODE::WRONG_DIM);
+            pLogger->log("In mul(...) expected the same dim of operands", RESULT_CODE::WRONG_DIM);
         }
         return NAN;
     }
@@ -134,9 +135,9 @@ double IVector::mul(IVector const *pOperand1, IVector const *pOperand2, ILogger*
     double ans = 0;
     for(size_t i = 0; i < _dim; ++i){
         double val = pOperand1->getCoord(i) * pOperand2->getCoord(i);
-        if (_isnan(val)){
+        if (__isnan(val)){
             if (pLogger != nullptr){
-                pLogger->log("Result of mul is NAN", RESULT_CODE::CALCULATION_ERROR);
+                pLogger->log("In mul(...)", RESULT_CODE::CALCULATION_ERROR);
             }
             return NAN;
         }
@@ -148,13 +149,13 @@ double IVector::mul(IVector const *pOperand1, IVector const *pOperand2, ILogger*
 IVector* IVector::mul(IVector const *pOperand1, double scaleParam, ILogger* pLogger) {
     if (pOperand1 == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Operand is nullptr", RESULT_CODE::BAD_REFERENCE);
+            pLogger->log("In mul(...)", RESULT_CODE::BAD_REFERENCE);
         }
         return nullptr;
     }
-    if(_isnan(scaleParam)){
+    if(__isnan(scaleParam)){
         if (pLogger != nullptr){
-            pLogger->log("Scale param is NAN", RESULT_CODE::NAN_VALUE);
+            pLogger->log("Scale param in mul(...)", RESULT_CODE::NAN_VALUE);
         }
         return nullptr;
     }
@@ -162,15 +163,15 @@ IVector* IVector::mul(IVector const *pOperand1, double scaleParam, ILogger* pLog
     auto* _arr = new (std::nothrow) double[_dim];
     if (!_arr){
         if (pLogger != nullptr){
-            pLogger->log("Not enough memory", RESULT_CODE::OUT_OF_MEMORY);
+            pLogger->log("In mul(...)", RESULT_CODE::OUT_OF_MEMORY);
         }
         return nullptr;
     }
     for(size_t i = 0; i < _dim; ++i){
         _arr[i] = pOperand1->getCoord(i) * scaleParam;
-        if (_isnan(_arr[i])){
+        if (__isnan(_arr[i])){
             if (pLogger != nullptr){
-                pLogger->log("Result of mul is NAN", RESULT_CODE::CALCULATION_ERROR);
+                pLogger->log("In mul(...)", RESULT_CODE::CALCULATION_ERROR);
             }
             return nullptr;
         }
@@ -184,7 +185,7 @@ IVector* IVector::mul(IVector const *pOperand1, double scaleParam, ILogger* pLog
 IVector* IVector::createVector(size_t dim, double *pData, ILogger* pLogger) {
     if(!dim){
         if (pLogger != nullptr){
-            pLogger->log("Dimension must be more than 0", RESULT_CODE::WRONG_DIM);
+            pLogger->log("In createVetor(...) dimension must be more than 0", RESULT_CODE::WRONG_DIM);
         }
         return nullptr;
     }
@@ -195,9 +196,9 @@ IVector* IVector::createVector(size_t dim, double *pData, ILogger* pLogger) {
         return nullptr;
     }
     for(size_t i = 0; i < dim; ++i){
-        if(_isnan(pData[i])){
+        if(__isnan(pData[i])){
             if (pLogger != nullptr){
-                pLogger->log("Some numbers in data array are NAN", RESULT_CODE::NAN_VALUE);
+                pLogger->log("In data array", RESULT_CODE::NAN_VALUE);
             }
             return nullptr;
         }
@@ -206,7 +207,7 @@ IVector* IVector::createVector(size_t dim, double *pData, ILogger* pLogger) {
     void *ptr = new(std::nothrow) unsigned char[_size];
     if (!ptr){
         if (pLogger != nullptr){
-            pLogger->log("Not enough memory", RESULT_CODE::OUT_OF_MEMORY);
+            pLogger->log("In createVector(...)", RESULT_CODE::OUT_OF_MEMORY);
         }
         return nullptr;
     }
@@ -216,27 +217,21 @@ IVector* IVector::createVector(size_t dim, double *pData, ILogger* pLogger) {
     return pVector;
 }
 
-double IVector::norm(IVector const *pVector, IVector::NORM norm, ILogger *pLogger) {
-    if (pVector == nullptr){
-        if (pLogger != nullptr){
-            pLogger->log("Vector is nullptr", RESULT_CODE::BAD_REFERENCE);
-        }
-        return NAN;
-    }
+double Vector_Impl::norm(IVector::NORM norm) const {
     double ans = 0;
     switch (norm){
         case IVector::NORM::NORM_1:
-            for (size_t i = 0; i < pVector->getDim(); ++i){
-                ans += fabs(pVector->getCoord(i));
+            for (size_t i = 0; i < this->getDim(); ++i){
+                ans += fabs(this->getCoord(i));
             }
             break;
         case IVector::NORM::NORM_2:
             double val;
-            for (size_t i = 0; i < pVector->getDim(); ++i){
-                val = pVector->getCoord(i)*pVector->getCoord(i);
-                if (_isnan(val)){
-                    if(pLogger != nullptr){
-                        pLogger->log("Result of mul is NAN", RESULT_CODE::CALCULATION_ERROR);
+            for (size_t i = 0; i < this->getDim(); ++i){
+                val = this->getCoord(i)*this->getCoord(i);
+                if (__isnan(val)){
+                    if(logger != nullptr){
+                        logger->log("In norm(...)", RESULT_CODE::CALCULATION_ERROR);
                     }
                     return NAN;
                 }
@@ -246,15 +241,15 @@ double IVector::norm(IVector const *pVector, IVector::NORM norm, ILogger *pLogge
             break;
         case IVector::NORM::NORM_INF:
             double cur;
-            ans = fabs(pVector->getCoord(0));
-            for (size_t i = 1; i < pVector->getDim(); ++i){
-                cur = fabs(pVector->getCoord(i));
+            ans = fabs(this->getCoord(0));
+            for (size_t i = 1; i < this->getDim(); ++i){
+                cur = fabs(this->getCoord(i));
                 ans = cur > ans ? cur : ans;
             }
             break;
         default:
-            if (pLogger != nullptr){
-                pLogger->log("Unknown type of norm", RESULT_CODE::WRONG_ARGUMENT);
+            if (logger != nullptr){
+                logger->log("In norm(...) unknown type of norm", RESULT_CODE::WRONG_ARGUMENT);
             }
             return NAN;
     }
@@ -265,27 +260,27 @@ RESULT_CODE IVector::equals(IVector const *pOperand1, IVector const *pOperand2, 
                             bool *result, ILogger *pLogger) {
     if (pOperand1 == nullptr || pOperand2 == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Some operands are nullptr", RESULT_CODE::BAD_REFERENCE);
+            pLogger->log("In equals(...)", RESULT_CODE::BAD_REFERENCE);
         }
         return RESULT_CODE::BAD_REFERENCE;
     }
-    if (_isnan(tolerance)){
+    if (__isnan(tolerance)){
         if (pLogger != nullptr){
-            pLogger->log("Tolerance is NAN", RESULT_CODE::NAN_VALUE);
+            pLogger->log("In equals(...) tolerance is NAN", RESULT_CODE::NAN_VALUE);
         }
         return RESULT_CODE::NAN_VALUE;
     }
     IVector *subVectors = IVector::sub(pOperand1, pOperand2, pLogger);
     if (subVectors == nullptr){
         if (pLogger != nullptr){
-            pLogger->log("Wrong calculating of sub", RESULT_CODE::CALCULATION_ERROR);
+            pLogger->log("In equals(...) wrong calculating of sub", RESULT_CODE::BAD_REFERENCE);
         }
         return RESULT_CODE::CALCULATION_ERROR;
     }
-    double normValue = IVector::norm(subVectors, norm, pLogger);
-    if (_isnan(normValue)){
+    double normValue = subVectors->norm(norm);
+    if (__isnan(normValue)){
         if (pLogger != nullptr){
-            pLogger->log("Norm's value is NAN", RESULT_CODE::NAN_VALUE);
+            pLogger->log("In equals(...) norm's value is NAN", RESULT_CODE::NAN_VALUE);
         }
         return RESULT_CODE::NAN_VALUE;
     }

@@ -31,7 +31,36 @@ Logger_Impl::Logger_Impl(void *pClient) {
 }
 
 void Logger_Impl::log(char const *pMsg, enum RESULT_CODE err) {
-    fprintf(logFile, "Error №%d: %s", err, pMsg);
+    fprintf(logFile, "Error №%d: ", err);
+    switch(err){
+        case RESULT_CODE::WRONG_DIM:
+            fprintf(logFile, "Wrong dimensions | ");
+            break;
+        case RESULT_CODE::NAN_VALUE:
+            fprintf(logFile, "Some values are NAN | ");
+            break;
+        case RESULT_CODE::BAD_REFERENCE:
+            fprintf(logFile, "Some operands are nullptr | ");
+            break;
+        case RESULT_CODE::WRONG_ARGUMENT:
+            fprintf(logFile, "Unknown type of norm | ");
+            break;
+        case RESULT_CODE::OUT_OF_BOUNDS:
+            fprintf(logFile, "Index is out of bounds | ");
+            break;
+        case RESULT_CODE::OUT_OF_MEMORY:
+            fprintf(logFile, "Not enough memory | ");
+            break;
+        case RESULT_CODE::CALCULATION_ERROR:
+            fprintf(logFile, "Result of operation is NAN | ");
+            break;
+        case RESULT_CODE::NOT_FOUND:
+            fprintf(logFile, "Not found element | ");
+            break;
+        default:
+            break;
+    }
+    fprintf(logFile, "%s", pMsg);
 }
 
 RESULT_CODE Logger_Impl::setLogFile(char const *pLogFile) {
